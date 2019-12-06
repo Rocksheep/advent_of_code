@@ -25,13 +25,11 @@ func main() {
 
 	shortestPath := 999999
 
-	for _, pointA := range pointsA {
-		for _, pointB := range pointsB {
-			if pointA.x == pointB.x && pointA.y == pointB.y {
-				distance := abs(pointA.x) + abs(pointA.y)
-				if distance < shortestPath {
-					shortestPath = distance
-				}
+	for key := range pointsB {
+		if val, ok := pointsA[key]; ok {
+			distance := abs(val.x) + abs(val.y)
+			if distance < shortestPath {
+				shortestPath = distance
 			}
 		}
 	}
@@ -39,21 +37,20 @@ func main() {
 	fmt.Println(shortestPath)
 }
 
-func getPoints(wire Wire) []Point {
-	dX := map[byte]int{'L': -1, 'U': 0, 'R': 1, 'D': 0}
-	dY := map[byte]int{'L': 0, 'U': 1, 'R': 0, 'D': -1}
+func getPoints(wire Wire) map[string]Point {
+	dPoint := map[byte]Point{'L': {-1, 0}, 'U': {0, 1}, 'R': {1, 0}, 'D': {0, -1}}
 	point := Point{0, 0}
 
-	points := []Point{}
+	points := map[string]Point{}
 	for _, path := range wire.path {
 		direction := path[0]
 		distance, _ := strconv.Atoi(path[1:])
 
 		for i := 0; i < distance; i++ {
-			point.x += dX[direction]
-			point.y += dY[direction]
+			point.x += dPoint[direction].x
+			point.y += dPoint[direction].y
 
-			points = append(points, point)
+			points[fmt.Sprintf("%d,%d", point.x, point.y)] = point
 		}
 	}
 
