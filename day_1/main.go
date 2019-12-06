@@ -111,7 +111,7 @@ func main() {
 	for _, mass := range rockets {
 		fuel := mass
 		for fuel > 0 {
-			fuel = mass/3 - 2
+			fuel = fuel/3 - 2
 			if fuel > 0 {
 				totalFuel += fuel
 			}
