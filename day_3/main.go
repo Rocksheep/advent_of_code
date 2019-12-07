@@ -6,7 +6,8 @@ import (
 )
 
 type Point struct {
-	x, y int
+	x, y     int
+	distance int
 }
 
 type Wire struct {
@@ -23,23 +24,29 @@ func main() {
 	pointsA := getPoints(wireA)
 	pointsB := getPoints(wireB)
 
-	shortestPath := 999999
+	shortestPath := 9999999
+	shortestTime := 9999999
 
-	for key := range pointsB {
-		if val, ok := pointsA[key]; ok {
-			distance := abs(val.x) + abs(val.y)
+	for key, pointB := range pointsB {
+		if pointA, ok := pointsA[key]; ok {
+			distance := abs(pointA.x) + abs(pointA.y)
 			if distance < shortestPath {
 				shortestPath = distance
+			}
+			time := pointA.distance + pointB.distance
+			if time < shortestTime {
+				shortestTime = time
 			}
 		}
 	}
 
-	fmt.Println(shortestPath)
+	fmt.Println("Shortest path: ", shortestPath)
+	fmt.Println("Shortest time: ", shortestTime)
 }
 
 func getPoints(wire Wire) map[string]Point {
-	dPoint := map[byte]Point{'L': {-1, 0}, 'U': {0, 1}, 'R': {1, 0}, 'D': {0, -1}}
-	point := Point{0, 0}
+	dPoint := map[byte]Point{'L': {-1, 0, 1}, 'U': {0, 1, 1}, 'R': {1, 0, 1}, 'D': {0, -1, 1}}
+	point := Point{0, 0, 0}
 
 	points := map[string]Point{}
 	for _, path := range wire.path {
@@ -49,6 +56,7 @@ func getPoints(wire Wire) map[string]Point {
 		for i := 0; i < distance; i++ {
 			point.x += dPoint[direction].x
 			point.y += dPoint[direction].y
+			point.distance++
 
 			points[fmt.Sprintf("%d,%d", point.x, point.y)] = point
 		}
