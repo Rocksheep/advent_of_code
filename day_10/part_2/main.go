@@ -41,25 +41,10 @@ func main() {
 
 	angles := []float64{}
 	floatMap := map[float64]point{}
-	fmt.Println(asteroidMap)
-	for slope, asteroid := range asteroidMap {
-		fmt.Println(slope, asteroid)
-	}
 	for slope := range asteroidMap {
-		var degrees float64
-		if slope.x == 0 && slope.y > 0 {
-			degrees = 180
-		} else if slope.x == 0 && slope.y < 0 {
-			degrees = 0
-		} else if slope.y == 0 && slope.x > 0 {
-			degrees = 90
-		} else if slope.y == 0 && slope.x < 0 {
-			degrees = 270
-		} else {
-			radians := math.Atan(float64(slope.y) / float64(slope.x))
-			degrees = float64(radians * (180 / math.Pi))
-		}
-		// degrees -= 90
+		radians := math.Atan2(float64(slope.y), float64(slope.x))
+		degrees := float64(radians * (180 / math.Pi))
+		degrees += 90
 		if degrees < 0 {
 			degrees += 360
 		}
@@ -68,8 +53,22 @@ func main() {
 	}
 	sort.Float64s(angles)
 
-	for _, angle := range angles {
-		fmt.Println(floatMap[angle], asteroidMap[floatMap[angle]])
+	hitCounter := 1
+	for hitCounter < 200 {
+		for _, angle := range angles {
+			asteroids := asteroidMap[floatMap[angle]]
+			fmt.Println("Shooting", asteroids[0], " shotIndex", hitCounter)
+			asteroidMap[floatMap[angle]] = asteroids[1:]
+			hitCounter++
+
+			if len(asteroidMap[floatMap[angle]]) == 0 {
+				delete(asteroidMap, floatMap[angle])
+			}
+
+			if hitCounter > 200 {
+				break
+			}
+		}
 	}
 }
 
