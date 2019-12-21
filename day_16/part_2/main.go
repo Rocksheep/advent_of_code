@@ -2,55 +2,56 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
 	"strconv"
 )
 
 func main() {
-	input := "03036732577212944063491565474664"
-	encoding := []int{0, 1, 0, -1}
-
-	offset, _ := strconv.Atoi(string(input[:7]))
-	inputLength := len(input)
-	bigInputLength := inputLength * 10000
-	halfInputLength := inputLength / 2
-	dX := bigInputLength - offset
-
-	fmt.Println(bigInputLength, offset)
-
-	fmt.Println(input)
-
-	for phase := 0; phase < 100; phase++ {
-		newInput := ""
-		for round := 1; round <= inputLength; round++ {
-			sum := 0
-			i := offset
-			if round > dX {
-				start := round - dX - 1
-				for i := halfInputLength + start; i < inputLength; i++ {
-					sum += int(input[i] - '0')
-					i++
-				}
-			} else {
-				for i < bigInputLength {
-					j := i % inputLength
-					c := input[j]
-					encodingIndex := ((j + 1) / round) % len(encoding)
-					value := int(c - '0')
-					sum += encoding[encodingIndex] * value
-					i++
-				}
-			}
-			newInput += strconv.Itoa(abs(sum % 10))
-		}
-		input = newInput
-		fmt.Println(input)
+	input, err := ioutil.ReadFile(os.Args[1])
+	if err != nil {
+		log.Fatal(err)
 	}
-	fmt.Println(input[:8])
+
+	message := parseMessage(input)
+	offset := offset(string(input))
+
+	for phase := 1; phase <= 100; phase++ {
+		result := make([]int, len(message))
+		sliceLength := offset
+
+		off := sliceLength - 1
+
+		sum := 0
+		for i := len(message) - 1; i >= off; i-- {
+			sum += (message[i])
+			result[i] = sum % 10
+		}
+
+		copy(message, result)
+	}
+
+	for _, value := range message[offset : offset+8] {
+		fmt.Print(value)
+	}
+	fmt.Print("\n")
 }
 
-func abs(x int) int {
-	if x < 0 {
-		return -x
+func parseMessage(message []byte) []int {
+	messageLength := len(message)
+	result := make([]int, messageLength*10000)
+	for i := 0; i < 10000; i++ {
+		start := messageLength * i
+		for j, c := range message {
+			result[start+j] = int(c - '0')
+		}
 	}
-	return x
+
+	return result
+}
+
+func offset(input string) int {
+	offset, _ := strconv.Atoi(string(input[:7]))
+	return offset
 }
